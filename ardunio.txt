@@ -1,0 +1,43 @@
+#include <Firmata.h>
+
+const int ledPins[] = {8, 9, 10, 11, 12}; 
+
+void setup() {
+  Firmata.begin(57600); 
+  for (int i = 0; i < 5; i++) {
+    pinMode(ledPins[i], OUTPUT);
+  }
+  Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
+  Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
+  Firmata.attach(SET_PIN_MODE, setPinModeCallback);
+  Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
+  Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
+}
+
+void loop() {
+  while (Firmata.available()) {
+    Firmata.processInput();
+  }
+}
+
+void analogWriteCallback(byte pin, int value) {
+  if (pin >= 8 && pin <= 12) {
+    analogWrite(pin, value);
+  }
+}
+
+void digitalWriteCallback(byte port, int value) {
+  for (int i = 0; i < 8; i++) {
+    int pin = i + port * 8;
+    if (pin >= 8 && pin <= 12) {
+      digitalWrite(pin, (value & (1 << i)) ? HIGH : LOW);
+    }
+  }
+}
+
+void setPinModeCallback(byte pin, int mode) {
+  if (pin >= 8 && pin <= 12) {
+    pinMode(pin, mode);
+  }
+}
+
